@@ -150,4 +150,3 @@ pentest_agent/
 
 - 授权:MIT(见 LICENSE)。
 - **仅供已授权的安全测试与教学研究使用。** 对未授权目标使用本项目造成的任何后果由使用者自行承担;请始终在你的授权范围(scope)内作业。
-- `config/settings.yaml`(含 API Key)与 `sessions/`(全部测试数据)已被 `.gitignore` 排除,不会进入仓库。
