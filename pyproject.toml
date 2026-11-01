@@ -1,0 +1,23 @@
+[project]
+name = "seax-agent"
+version = "0.1.0"
+description = "Seax — 自主作业的渗透测试/红队 Agent：侦察/渗透/红队三模式，Windows 原生运行，Burp 风格原始报文取证，发现必经独立验证"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "httpx>=0.27",
+    "pydantic>=2.5",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+seax = "pentest_agent.cli:main"
+ptagent = "pentest_agent.cli:main"  # 旧命令,兼容保留
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["pentest_agent*"]

@@ -1,0 +1,40 @@
+# PT-Agent 工具货架(样例)—— 复制为 config/tools.local.yaml 后按需修改(该文件已被 .gitignore)
+#
+# 这只是"货架"不是"流程":清单只声明有哪些工具、怎么安全地调用它们;
+# 用哪个工具、什么时候用,由 agent 自主判断,这里不写任何使用顺序或组合。
+#
+# 不配置本文件、不配置 tools.dir,agent 依然可以完整作业(send_http_request 手工验证)。
+#
+# 字段说明:
+#   resolve: path = 从系统 PATH 解析(开源用户装好工具即可用)
+#            file = 相对 tools.dir 的路径(本地武器库;可用 scripts/gen_tool_registry.py 生成)
+#            abs  = 绝对路径
+#   class: read = 默认只读(渗透模式免确认); command = 默认需人工确认
+#   target_flag: 目标怎么传给命令行(空=位置参数);target 参数会逐个过 scope 校验
+#   args / allow_extra_args / danger_flags / timeout / output_hint 均可省略
+tools:
+  nmap:
+    resolve: path
+    description: 主机发现与端口/服务扫描
+    class: read
+    args: "-Pn"
+    output_hint: "支持 -oX - 输出 XML,按 host/port 解析更准"
+  nuclei:
+    resolve: path
+    description: 基于模板的漏洞扫描
+    class: read
+    output_hint: "建议 -jsonl,输出为逐行 JSON 事件"
+  httpx:
+    resolve: path
+    description: Web 存活探测(标题/状态码/技术栈)
+    class: read
+    target_flag: "-u"
+    multiple_targets: false
+  subfinder:
+    resolve: path
+    description: 被动子域枚举
+    class: read
+  sqlmap:
+    resolve: path
+    description: SQL 注入自动化检测与利用(会改库,默认需确认)
+    class: command

@@ -1,0 +1,53 @@
+# PT-Agent 配置模板 —— 复制为 settings.yaml 后填写（api_key 支持 ${ENV_VAR} 写法）
+llm:
+  main:                        # 主模型：规划、漏洞验证决策（function calling 质量优先）
+    provider: openai_compat    # openai_compat | anthropic
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    api_key: ${GLM_API_KEY}
+    model: glm-4.6             # 按你实际用的模型改
+    context_window: 262144     # 上下文窗口，两档：262144(256K) / 1048576(1M)
+    max_tokens: 8192           # 单次最大输出（不是上下文窗口）
+    thinking: true             # 输出思考过程（GLM-4.6 支持；Claude 走 extended thinking）
+  fast:                        # 快模型：上下文压缩等脏活（不配则自动用主模型）
+    provider: openai_compat
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    api_key: ${GLM_API_KEY}
+    model: glm-4.6
+    max_tokens: 4096
+
+# 可选：send_http_request 走代理（如联动 Burp：http://127.0.0.1:8080）
+proxy: ""
+
+tools:                         # 选配件:不配置也能完整作业(agent 用 send_http_request 手工验证)
+  dir: "E:/安全/tools"                # 本地工具库根目录(可省;只作为货架 path 的解析基准)
+  registry: "config/tools.local.yaml" # 工具货架清单(可省;默认也读这个路径,文件不存在=空货架)
+                                      # 生成草稿: python scripts/gen_tool_registry.py --dir <你的工具库>
+                                      # 样例: config/tools.example.yaml(公开工具,PATH 解析)
+
+policy:
+  max_rounds: 200                     # 单次任务最大循环轮数
+  max_subagents: 5                    # 子 agent 最大并发数
+  auto_compress: true                 # 工具输出先微压缩；接近窗口阈值时生成带 ID 的工作笔记
+  allow_destructive_in_full: false    # 完全授权下是否放行不可逆破坏操作（建议保持 false）
+  allow_postex_in_full: true          # 完全授权下放行后渗透类请求（读系统文件/命令执行 payload 等）；false = 逐次确认
+  skip_checkpoint_in_full_auth: true  # 完全授权下是否跳过红队“确认资产”卡点
+  enable_run_command: false           # 是否挂载 run_command 任意命令工具（红队用，挂载后除完全授权外都需确认）
+  approval_timeout: 600               # 审批等待秒数，超时视为拒绝
+  distill_on_finish: true             # 任务 finish 时是否把可复用通用经验沉淀为技能卡（写入 skills/）
+  skills_inline: true                 # 是否把 auto 技能正文内联进系统提示（false 则只列清单、按需 use_skill 加载）
+
+workspace_dir: "sessions"             # 默认工作区根目录（可在对话里按会话指定其他目录）
+
+skills:
+  dir: "skills"                       # 技能目录：每个子目录一个 SKILL.md（agent 用 use_skill 加载）
+
+# MCP servers（stdio 传输）。示例：
+# mcp:
+#   servers:
+#     everything:
+#       command: npx
+#       args: ["-y", "@modelcontextprotocol/server-everything"]
+#     myserver:
+#       command: python
+#       args: ["D:/path/to/server.py"]
+#       trust: true              # true=该 server 的工具默认放行；默认 false=调用需人工确认
